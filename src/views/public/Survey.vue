@@ -25,7 +25,17 @@
       <!-- Perhatikan penambahan class="p-8 pt-6" pada form agar jaraknya tetap rapi -->
       <form @submit.prevent="handleSubmit" class="p-8 pt-6">
         
-        <!-- ... (Sisanya mulai dari input "Nama Pasien" ke bawah biarkan sama persis seperti sebelumnya) ... -->
+        <!-- Field Nama Pasien -->
+        <div class="mb-6">
+          <label class="block font-semibold text-gray-800 mb-2">1. Nama Pasien <span class="text-red-500">*</span></label>
+          <input 
+            v-model="form.nama" 
+            type="text" 
+            required 
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+            placeholder="Masukkan nama lengkap Anda..."
+          >
+        </div>
 
         <RatingInput v-model="form.registrasi" label="2. Pelayanan Petugas Registrasi" description="Silakan beri penilaian tentang pelayanan petugas registrasi." />
         <RatingInput v-model="form.perawat" label="3. Pelayanan Petugas Perawat Poli" description="Silakan beri penilaian tentang pelayanan petugas perawat poli." />
