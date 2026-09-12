@@ -1,18 +1,13 @@
 <template>
-  <div class="max-w-3xl mx-auto px-4">
-    <!-- Hapus border atas yang lama, dan tambahkan overflow-hidden agar gambar tidak keluar dari sudut membulat -->
-    <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-10">
+  <div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
       
-      <!-- PANEL JUDUL DENGAN BACKGROUND GAMBAR -->
-      <!-- Pastikan nama file 'bg-rs.jpg' sesuai dengan nama foto Anda di folder public -->
+      <!-- Panel Judul dengan Background Foto -->
       <div 
         class="relative px-8 py-10 bg-cover bg-center" 
         style="background-image: url('/bg-rs.jpg');"
       >
-        <!-- Overlay biru gelap transparan agar tulisan putih tetap terbaca jelas -->
         <div class="absolute inset-0 bg-blue-900/75"></div>
-        
-        <!-- Tulisan Judul (Diubah menjadi warna putih dan terang) -->
         <div class="relative z-10">
           <h1 class="text-3xl font-bold text-white mb-1">Survei Kepuasan Pasien</h1>
           <h2 class="text-lg text-blue-100 mb-4">Rawat Jalan - RS. Metta Medika II</h2>
@@ -21,8 +16,7 @@
         </div>
       </div>
 
-      <!-- FORM SURVEI BAWAHNYA TETAP SAMA -->
-      <!-- Perhatikan penambahan class="p-8 pt-6" pada form agar jaraknya tetap rapi -->
+      <!-- Form Survei -->
       <form @submit.prevent="handleSubmit" class="p-8 pt-6">
         
         <!-- Field Nama Pasien -->
@@ -47,58 +41,64 @@
         <RatingInput v-model="form.kasir" label="9. Pelayanan Petugas Kasir" description="Silakan beri penilaian tentang pelayanan petugas kasir." />
         <RatingInput v-model="form.kebersihan" label="10. Kebersihan dan Kenyamanan Ruang Tunggu: Poli" description="Silakan beri penilaian tentang kebersihan dan kenyamanan ruang tunggu poli." />
 
-        <div class="mb-8 p-5">
+        <div class="mb-8">
           <label class="block font-semibold text-gray-800 mb-2">11. Saran & Kritik</label>
-          <textarea v-model="form.saran" rows="4" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" placeholder="Tuliskan saran dan kritik Anda di sini..."></textarea>
+          <textarea 
+            v-model="form.saran" 
+            rows="4" 
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+            placeholder="Tuliskan saran dan kritik Anda di sini..."
+          ></textarea>
         </div>
 
-        <button type="submit" :disabled="isSubmitting" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl disabled:bg-gray-400 transition-colors shadow-md hover:shadow-lg">
-          {{ isSubmitting ? 'Mengirim Data...' : 'Kirim Survei' }}
+        <button 
+          type="submit" 
+          :disabled="isSubmitting" 
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-colors shadow-md disabled:bg-blue-300"
+        >
+          {{ isSubmitting ? 'Mengirim...' : 'Kirim Survei' }}
         </button>
       </form>
+    </div>
+
+    <!-- Copyright Footer -->
+    <div class="text-center text-xs text-slate-400 pb-4">
+      &copy; 2026 Leo Rentius. All rights reserved.
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
-import { submitSurvey } from '../../services/surveyService'
-import RatingInput from '../../components/survey/RatingInput.vue'
+import { supabase } from '@/services/supabase'
+import RatingInput from '@/components/RatingInput.vue'
 
 const router = useRouter()
 const isSubmitting = ref(false)
 
-// State untuk menyimpan jawaban form
 const form = reactive({
   nama: '',
-  registrasi: 0,
-  perawat: 0,
-  dokter: 0,
-  verifikator: 0,
-  lab: 0,
-  radiologi: 0,
-  farmasi: 0,
-  kasir: 0,
-  kebersihan: 0,
+  registrasi: 5,
+  perawat: 5,
+  dokter: 5,
+  verifikator: 5,
+  lab: 5,
+  radiologi: 5,
+  farmasi: 5,
+  kasir: 5,
+  kebersihan: 5,
   saran: ''
 })
 
 const handleSubmit = async () => {
-  // Validasi: pastikan semua rating sudah diisi (nilainya > 0)
-  if (!form.registrasi || !form.perawat || !form.dokter || !form.verifikator || 
-      !form.lab || !form.radiologi || !form.farmasi || !form.kasir || !form.kebersihan) {
-    alert('Mohon berikan penilaian bintang pada semua pertanyaan (No. 2 sampai 10).')
-    return
-  }
-
   try {
     isSubmitting.value = true
-    await submitSurvey(form) // Kirim data ke Supabase
-    router.push({ name: 'Success' }) // Pindah ke halaman sukses jika berhasil
+    const { error } = await supabase.from('responses').insert([form])
+    if (error) throw error
+    router.push({ name: 'Success' })
   } catch (error) {
-    alert('Terjadi kesalahan koneksi ke database. Pastikan konfigurasi Supabase Anda benar.')
-    console.error(error)
+    alert('Terjadi kesalahan saat mengirim survei. Silakan coba lagi.')
   } finally {
     isSubmitting.value = false
   }
