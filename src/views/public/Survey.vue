@@ -60,7 +60,7 @@
         </button>
       </form>
     </div>
-
+    
     <!-- Copyright Footer -->
     <div class="text-center text-xs text-slate-400 pb-4">
       &copy; 2026 Leo Rentius. All rights reserved.
